@@ -27,8 +27,9 @@ const shohidShafiur = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+  title: "সাপের খেলা",
+  description: "Next.js দিয়ে তৈরি একটি ক্লাসিক সাপের খেলা।",
+  icons: "/favicon.ico", // public ফোল্ডারে থাকা favicon.ico ফাইল
   keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
   authors: [{ name: "Z.ai Team" }],
   openGraph: {
