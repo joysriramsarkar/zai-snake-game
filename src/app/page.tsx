@@ -374,19 +374,18 @@ export default function Home() {
 
   // Render game cell
   const renderCell = (x: number, y: number) => {
-    const snakeIndex = gameData.snake.findIndex(segment => segment.x === x && segment.y === y)
-    const isSnake = snakeIndex !== -1
-    const isHead = snakeIndex === 0
-    const isTail = snakeIndex === gameData.snake.length - 1
-    const fruit = gameData.fruits.find(f => f.position.x === x && f.position.y === y)
-    const isWall = gameData.walls.some(wall => wall.x === x && wall.y === y)
+    const snakeIndex = gameData.snake.findIndex(segment => segment.x === x && segment.y === y);
+    const isSnake = snakeIndex !== -1;
+    const isHead = snakeIndex === 0;
+    const isTail = snakeIndex === gameData.snake.length - 1;
+    const fruit = gameData.fruits.find(f => f.position.x === x && f.position.y === y);
+    const isWall = gameData.walls.some(wall => wall.x === x && wall.y === y);
 
-    let cellClass = ''
-
+    let cellClass = '';
     if (isWall) {
-      cellClass += 'bg-gray-800 dark:bg-gray-600 '
+      cellClass += 'bg-gray-800 dark:bg-gray-600 ';
     } else if (!isSnake) {
-      cellClass += 'bg-white dark:bg-gray-900 '
+      cellClass += 'bg-white dark:bg-gray-900 ';
     }
 
     return (
@@ -415,57 +414,48 @@ export default function Home() {
           const toHead = snakeIndex > 0 ? gameData.snake[snakeIndex - 1] : null;
           const fromTail = snakeIndex < gameData.snake.length - 1 ? gameData.snake[snakeIndex + 1] : null;
 
-          const connects = { up: false, down: false, left: false, right: false };
+          const isCorner = toHead && fromTail && (toHead.x !== fromTail.x && toHead.y !== fromTail.y);
 
-          if (toHead) {
-              if (toHead.x < segment.x) connects.left = true;
-              if (toHead.x > segment.x) connects.right = true;
-              if (toHead.y < segment.y) connects.up = true;
-              if (toHead.y > segment.y) connects.down = true;
+          const getBodyGradient = (isHead: boolean) => {
+            return isHead
+              ? 'from-green-600 to-green-800 dark:from-green-500 dark:to-green-700'
+              : 'from-green-400 to-green-600 dark:from-green-300 dark:to-green-500';
+          };
+
+          let borderRadius = 'rounded-sm';
+          if (isCorner) {
+            if ((toHead.y < segment.y && fromTail.x < segment.x) || (fromTail.y < segment.y && toHead.x < segment.x)) {
+              borderRadius = 'rounded-tl-lg';
+            } else if ((toHead.y < segment.y && fromTail.x > segment.x) || (fromTail.y < segment.y && toHead.x > segment.x)) {
+              borderRadius = 'rounded-tr-lg';
+            } else if ((toHead.y > segment.y && fromTail.x < segment.x) || (fromTail.y > segment.y && toHead.x < segment.x)) {
+              borderRadius = 'rounded-bl-lg';
+            } else {
+              borderRadius = 'rounded-br-lg';
+            }
+          } else if(isHead) {
+            borderRadius = 'rounded-md';
+          } else if (isTail) {
+            borderRadius = 'rounded-md';
           }
-
-          if (fromTail) {
-              if (fromTail.x < segment.x) connects.left = true;
-              if (fromTail.x > segment.x) connects.right = true;
-              if (fromTail.y < segment.y) connects.up = true;
-              if (fromTail.y > segment.y) connects.down = true;
-          }
-
-          const bodyColor = "bg-green-500 dark:bg-green-400";
-          const headColor = "bg-green-700 dark:bg-green-600";
-          const scale = 0.85;
-          const inset = `${(1 - scale) / 2 * 100}%`;
-          const size = `${scale * 100}%`;
-
-          const color = isHead ? headColor : bodyColor;
 
           return (
-            <div className="w-full h-full absolute top-0 left-0">
-              {/* Central part */}
-              <div className={`absolute ${color}`} style={{
-                  width: size, height: size,
-                  top: inset, left: inset,
-                  borderRadius: isHead ? '4px' : '2px'
-              }}>
-                {isHead && (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <div className="flex gap-1">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full border-black border"></div>
-                            <div className="w-1.5 h-1.5 bg-white rounded-full border-black border"></div>
-                        </div>
-                    </div>
-                )}
-              </div>
-              {/* Connections */}
-              {connects.up && <div className={`absolute ${color}`} style={{ width: size, height: '51%', top: 0, left: inset }}></div>}
-              {connects.down && <div className={`absolute ${color}`} style={{ width: size, height: '51%', bottom: 0, left: inset }}></div>}
-              {connects.left && <div className={`absolute ${color}`} style={{ width: '51%', height: size, top: inset, left: 0 }}></div>}
-              {connects.right && <div className={`absolute ${color}`} style={{ width: '51%', height: size, top: inset, right: 0 }}></div>}
+            <div
+              className={`w-full h-full absolute top-0 left-0 bg-gradient-to-br ${getBodyGradient(isHead)} ${borderRadius} shadow-lg shadow-black/30`}
+            >
+              {isHead && (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-white rounded-full border-2 border-black"></div>
+                    <div className="w-2 h-2 bg-white rounded-full border-2 border-black"></div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })()}
       </div>
-    )
+    );
   }
 
   const levelProgress = ((gameData.score - (gameData.nextLevelScore - SCORE_PER_LEVEL)) / SCORE_PER_LEVEL) * 100
