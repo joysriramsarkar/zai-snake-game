@@ -50,13 +50,34 @@ async function createCustomServer() {
 
     const gracefulShutdown = (signal: string) => {
       console.log(`[${signal}] Received, shutting down...`);
-      io.close(() => {
-        console.log('[Socket.IO] Server closed.');
-        server.close(() => {
+
+      const closeHttpServer = new Promise<void>((resolve, reject) => {
+        server.close((err) => {
+          if (err) {
+            console.error('[HTTP] Server close error:', err);
+            return reject(err);
+          }
           console.log('[HTTP] Server closed.');
-          process.exit(0);
+          resolve();
         });
       });
+
+      const closeSocketIoServer = new Promise<void>((resolve) => {
+        io.close(() => {
+          console.log('[Socket.IO] Server closed.');
+          resolve();
+        });
+      });
+
+      Promise.all([closeHttpServer, closeSocketIoServer])
+        .then(() => {
+          console.log('All servers closed. Exiting.');
+          process.exit(0);
+        })
+        .catch((err) => {
+          console.error('Error during graceful shutdown:', err);
+          process.exit(1);
+        });
     };
 
     // Gracefully handle shutdown signals
